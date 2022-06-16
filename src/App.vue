@@ -1,16 +1,9 @@
 <template>
-  <nav class="navbar fixed-top navbar-dark bg-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">Storied</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-labe="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+    <div>
+      <StoryTiles/>
+    <div class="container-fluid bg-dark text-light mt-3 text-center fixed-bottom"> Storied &#169; 2022</div>
     </div>
-  </nav>
-  <div id="app">
-    <StoryTiles/>
-  </div>
-  <div class="container-fluid bg-dark text-light mt-3 text-center"> Storied &#169; 2022 </div>
+    
 </template>
 
 <script>
@@ -18,10 +11,16 @@ import StoryTiles from './components/StoryTiles.vue'
 
 export default {
   name: 'App',
+  data () {
+    return {
+      image: "/Users/christopherroos/Programming/pdx_code/class_koi/5_capstone/storied/src/assets/daniel-burka-facU72FcKBI-unsplash.jpg"
+    }
+  },
   components: {
-    StoryTiles
-  }
+    StoryTiles,
+  },
 }
+
 </script>
 
 <style>
@@ -32,5 +31,10 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
-}
+  background-image: url('~@/assets/linus-sandvide.jpg');
+  background-size: 100%;
+  min-height: 100vh;
+};
+
+
 </style>
