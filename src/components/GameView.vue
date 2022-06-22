@@ -1,13 +1,10 @@
 <template>
-    <NavBar 
-        :story="story" 
-        :storyTitles="storyTitles"
-        @handle-pick-story="pickStory"
-    />
-
+    <div class="text-light">
+        <!-- {{ gameStorytiles }} -->
+    </div>
     <div class="row mx-3 mb-3">
-        <div class="col text-center">
-            <h3>Map</h3>
+        <div class="col text-center mt-3">
+            <h3 class="text-light">Map</h3>
             <canvas id="grid" width="200" height="200"></canvas>
                 <br>
             <button @click='moveForward' class="btn btn-secondary mx-2 mb-2">Forward</button>
@@ -18,14 +15,14 @@
             <button @click='moveBackward' class="btn btn-secondary mx-2 mt-2">Backward</button>
         </div>
 
-        <div class="col text-center">
-            <h3>Player Stats</h3>
+        <div class="col text-center mt-3">
+            <h3 class="text-light">Player Stats</h3>
             build a model and render a list here.
         </div>
     </div>
     
     <div class="row mx-3 overflow-auto" style="max-height:300px;">
-        <div v-if="storytiles[0]" class="col-md gameplay-container mb-3">
+        <div class="col-md gameplay-container mb-3"> <!-- v-if="gameStorytiles[0]" -->
             <div class="storytiles_content">
                 <div class="font-monospace bg-dark text-white mb-3">
                     <ul v-for="item in promptList" :key="item.id" class="list-group text-white">
@@ -36,69 +33,63 @@
                             >>>{{ item }}
                         </li>
                     </ul>
-                </div>
-                
-        
+                </div>                        
             </div>
-
         </div>
     </div>
 
 </template>
 
 <script>
-    import NavBar from './NavBar.vue'
-
-    export default {
-        components: {
-            NavBar,
+    export default {        
+        props: {
+            storytiles: {
+                type: Array,
+                required: true,
+                default: () => []
+            },
+            story: {
+                type: String,
+                required: true,
+                default: () => ''
+            }
         },
         data() {
             return {
-                // StoryTiles
-                storytiles: [],
-                promptId: 0,
+                gameStorytiles: this.storytiles,
+                gamePrompt: '',
+                gameXyCoord: '',
                 xCoord: 0,
                 yCoord: 0,
-                xyCoord: ``,        
-                story: '',
+                gameStory: '',
                 storyPrompt: '',
                 promptList: [],
-                gamePrompt: '',
-                storyTitles: [],
-
             }
         },
-        methods: {
-            async getData() {
-                try {
-                    // fetch storytiles
-                    const response = await this.$http.get('http://localhost:8000/api/story_tiles/?format=json');
-                    this.storytiles = response.data;
-                    for (let i=0; i<this.storytiles.length; i++) {
-                        this.storytiles[i].xyCoords = `(${this.storytiles[i].x_coord}, ${this.storytiles[i].y_coord})`
-                    }
-                    this.xCoord = this.storytiles[0].x_coord
-                    this.yCoord = this.storytiles[0].y_coord
-                    this.story = this.storytiles[0].story
-                    for (let i=0; i<this.storytiles.length; i++) {
-                        if (!this.storyTitles.includes(this.storytiles[i].story)){
-                            this.storyTitles.push(this.storytiles[i].story)
-                        }
-                    }
-                    this.setGameData()
-                } catch (error) {
-                    // log the error
-                    console.log(error)
-                }
-            },            
+        methods: {            
             setGameData() {
-                this.xyCoord = `(${this.xCoord}, ${this.yCoord})`
+                console.log('setGameData EXECUTED')
+                // this.gameStorytiles = this.storytiles
+                console.log(this.storytiles)
+                this.xCoord = this.storytiles[0].x_coord
+                console.log('beginning this.xCoord: ', this.xCoord)
+                this.yCoord = this.storytiles[0].y_coord
+                console.log('beginning this.yCoord: ', this.yCoord)
+                this.gameStory = this.story
+                console.log(this.gameStory)
                 this.gamePrompt = ''
+                this.setCoords()
+                this.setGamePrompts()
+            },
+            setCoords() {
+                console.log('setCoords EXECUTED')
+                this.xyCoord = `(${this.xCoord}, ${this.yCoord})`
+                console.log(this.xyCoord)
                 for (let i=0; i<this.storytiles.length; i++) {
                     if (this.storytiles[i].xyCoords == this.xyCoord && this.storytiles[i].story == this.story) {
                         this.storyPrompt = this.storytiles[i].prompt
-                        this.setGamePrompts()
+
+                        // this.setGamePrompts()
                     }
                 }
             },
@@ -107,19 +98,8 @@
                 this.promptList.reverse()
                 console.log(`PROMPT LIST: ${this.promptList}`)
             },
-            pickStory(story) {
-                this.story = story
-                this.setGameData()
-                this.resetStory()
-            },
-            resetStory() {
-                this.xCoord = 0
-                this.yCoord = 0
-                this.promptList = []
-                this.genGrid()
-                this.setGamePrompts()
-            },
             genGrid() {
+                console.log('genGrid EXECUTED')
                 const canvas = document.getElementById('grid');
                 const ctx = canvas.getContext('2d');
                 ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -152,59 +132,78 @@
                     }
                 }
             },
+            resetStory() {
+                console.log('resetStory EXECUTED')
+                this.xCoord = 0
+                this.yCoord = 0
+                this.promptList = []
+                this.genGrid()
+                this.setGamePrompts()
+            },
             moveLeft () {
                 if (this.xCoord > 0) {
                     this.xCoord --
-                    this.setGameData()
+                    this.setCoords()
+                    this.gamePrompt = ''
+                    this.setGamePrompts()
                     this.genGrid()
                 }
                 else if (this.xCoord == 0) {
                     this.gamePrompt = "There is a massive cliff to your left. You cannot go in that direction."
                     this.setGamePrompts()
                 }
+                console.log('moveLeft EXECUTED', this.xCoord, this.yCoord)
             },
             moveRight () {
                 if (this.xCoord < 1) {
                     this.xCoord ++
-                    this.setGameData()
+                    this.setCoords()
+                    this.gamePrompt = ''
+                    this.setGamePrompts()
                     this.genGrid()
                 }
                 else if (this.xCoord == 1) {
                     this.gamePrompt = "There is a massive cliff to your right. You cannot go in that direction."
                     this.setGamePrompts()
                 }
+                console.log('moveRight EXECUTED', this.xCoord, this.yCoord)
             },
             moveForward () {
                 if (this.yCoord < 1) {
                     this.yCoord ++
-                    this.setGameData()
+                    this.setCoords()
+                    this.gamePrompt = ''
+                    this.setGamePrompts()
                     this.genGrid()
                 }
                 else if (this.yCoord == 1) {
                     this.gamePrompt = "There is a massive cliff ahead of you. You cannot go in that direction."
                     this.setGamePrompts()
                 }
+                console.log('moveForward EXECUTED', this.xCoord, this.yCoord)
             },
             moveBackward () {
                 if (this.yCoord > 0) {
                     this.yCoord --
-                    this.setGameData()
+                    this.setCoords()
+                    this.gamePrompt = ''
+                    this.setGamePrompts()
                     this.genGrid()
                 }
                 else if(this.yCoord == 0) {
                     this.gamePrompt = "There is a massive cliff that way. You cannot go in that direction."
                     this.setGamePrompts()
                 }
+                console.log('moveBackward EXECUTED', this.xCoord, this.yCoord)
             }
-            
-        },
-        created() {
-            // Fetch storytiles on page load
-            this.getData()
-            this.setGameData()
         },
         mounted() {
             this.genGrid()
+            // this.setGameData()
+        },
+        beforeMount() {
+            this.setGameData()
+            // this.genGrid()
         }
     }
 </script>
