@@ -100,6 +100,7 @@ export default {
 </script>
 
 <style>
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -112,6 +113,5 @@ export default {
   background-position: center;
   min-height: 100vh;
 };
-
 
 </style>
