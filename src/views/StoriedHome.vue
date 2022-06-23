@@ -1,7 +1,10 @@
 <template>
     <div class="home">
     <div v-if="this.$store.state.isAuthenticated" class="text-light">
-        <!-- <GameView/> -->
+        <br>
+        <p class="text-light">Welcome to Storied, a place for gaming enthusiasts of well-crafted Fantasy and Sci-Fi Stories.</p>
+        <br>
+        <p class="text-light">Select your story from the menu to begin playing.</p>
     </div>
     <div v-else class="d-grid gap-1 col-6 mx-auto text-light">
         <br>

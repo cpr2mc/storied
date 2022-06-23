@@ -4,6 +4,8 @@ import StoriedHome from '../views/StoriedHome.vue'
 import StoriedAbout from '../views/StoriedAbout.vue'
 import SignUp from '../views/SignUp.vue'
 import LogIn from '../views/LogIn.vue'
+// import GamePlay from '../views/GamePlay.vue'
+import GameView from '../components/GameView.vue'
 
 const routes = [
     {
@@ -26,6 +28,14 @@ const routes = [
         name: 'LogIn',
         component: LogIn
     },
+    {
+        path: '/play/:story',
+        name: 'GameView',
+        component: GameView,
+        // name: 'GamePlay',
+        // component: GamePlay,
+        props: true
+    },
 ]
 
 const router = createRouter({
@@ -34,3 +44,4 @@ const router = createRouter({
 })
 
 export default router
+

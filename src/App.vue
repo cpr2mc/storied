@@ -4,17 +4,21 @@
       <NavBar
         :story="story" 
         :storyTitles="storyTitles"
+        :storytiles="storytiles"
+        :promptList="promptList"
         @handle-pick-story="pickStory"
       />
 
       <router-view/>
       
-      <div v-if="this.$store.state.isAuthenticated" id="gameView">
+      <!-- <div v-if="this.$store.state.isAuthenticated" id="gameView">
         <GameView
           :story="story"
           :storytiles="storytiles"
+          :promptList="promptList"
+
         />
-      </div>
+      </div> -->
       
       <div class="container-fluid bg-dark text-light mt-3 text-center fixed-bottom"> Storied &#169; 2022</div>
     </div>
@@ -24,7 +28,7 @@
 
 import axios from 'axios'
 import NavBar from './components/NavBar.vue'
-import GameView from './components/GameView.vue'
+// import GameView from './components/GameView.vue'
 
 export default {
   name: 'App',
@@ -71,6 +75,7 @@ export default {
     },
     pickStory(story) {
       this.story = story
+      this.promptList = []
       // this.setGameData()
       // this.resetStory()
     },     
@@ -78,7 +83,7 @@ export default {
   
   components: {
     NavBar,
-    GameView,
+    // GameView,
   },
 
   beforeCreate() {

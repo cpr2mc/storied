@@ -2,7 +2,7 @@
     <nav class="navbar navbar-dark bg-dark fixed-top text-light">
         <div class="container-fluid">
         <router-link class="navbar-brand text-secondary" to="/">Storied</router-link>
-        <span v-if="this.$store.state.isAuthenticated" class="text-center fs-4">{{ story }}</span>
+        <span v-if="this.$store.state.isAuthenticated && isGamePlay" class="text-center fs-4">{{ story }}</span>
         <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -25,7 +25,17 @@
                             Stories
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="offcanvasNavbarDropdown">
-                            <li v-for="story in storyTitles" :key="story"><a class="dropdown-item" @click='pickStory(story)'>{{ story }}</a></li>
+                            <li v-for="story in storyTitles" :key="story">
+                                <router-link 
+                                    class="dropdown-item" 
+                                    @click='pickStory(story)' 
+                                    :to="{ 
+                                        name: 'GameView',
+                                        params: {story: story},
+                                    }">
+                                {{ story }}
+                                </router-link>
+                            </li>
                         </ul>
                     </li>
                 </div>
@@ -56,11 +66,26 @@
                 type: Array,
                 required: true,
                 default: () => []
-            }
+            },
+            storytiles: {
+                type: Array,
+                required: true,
+                default: () => []
+            },
+            promptList: {
+                type: Array,
+                required: true,
+                default: () => []
+            },
         },
         methods: {
             pickStory(story) {
                 this.$emit('handle-pick-story', story)
+            }
+        },
+        computed: {
+            isGamePlay() {
+                return this.$route.name === 'GameView'
             }
         }
     }

@@ -1,18 +1,22 @@
 <template>
-    <div class="sign-up">
-        <h3 class="text-light">Sign Up</h3>
-        <form @submit.prevent="submitForm">
-            <div class="mb-1 mx-auto text-light" style="width:200px;">
-                <label for="SignUpEmail" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="SignUpEmail" name="username" v-model="username">
-            </div>
-            <div class="mb-3 mx-auto text-light" style="width:200px;">
-                <label for="SignUpPassword" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="SignUpPassword" name="password" v-model="password">
-            </div>
-            <button type="submit" class="btn btn-secondary">Sign-up</button>
-        </form>
+    <div v-if="!this.$store.state.isAuthenticated">
+        <div class="sign-up">
+            <h3 class="text-light">Sign Up</h3>
+            <div v-if="signUpError" class="text-danger">{{ signUpError }}</div>
+            <form @submit.prevent="submitForm">
+                <div class="mb-1 mx-auto text-light" style="width:200px;">
+                    <label for="SignUpEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="SignUpEmail" name="username" v-model="username">
+                </div>
+                <div class="mb-3 mx-auto text-light" style="width:200px;">
+                    <label for="SignUpPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="SignUpPassword" name="password" v-model="password">
+                </div>
+                <button type="submit" class="btn btn-secondary">Sign-up</button>
+            </form>
+        </div>
     </div>
+    <div v-else class="text-light">You are already logged in.</div>
 </template>
 
 <script>
@@ -24,7 +28,8 @@ import axios from 'axios'
             return {
                 username: '',
                 password: '',
-                email: ''
+                email: '',
+                signUpError: ''
             }
         },
         methods: {
@@ -42,6 +47,7 @@ import axios from 'axios'
                     })
                     .catch(error => {
                         console.log(error)
+                        this.signUpError = 'Sign up failed. Please check that your username is in email format and that your password contains at least one special character and one number.'
                     })
             }
         }

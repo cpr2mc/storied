@@ -1,76 +1,109 @@
 <template>
-    <div class="text-light">
-        <!-- {{ gameStorytiles }} -->
-    </div>
-    <div class="row mx-3 mb-3">
-        <div class="col text-center mt-3">
-            <h3 class="text-light">Map</h3>
-            <canvas id="grid" width="200" height="200"></canvas>
-                <br>
-            <button @click='moveForward' class="btn btn-secondary mx-2 mb-2">Forward</button>
-                <br>
-            <button @click='moveLeft' class="btn btn-secondary mx-2">Left</button>
-            <button @click='moveRight' class="btn btn-secondary mx-2">Right</button>
-                <br>
-            <button @click='moveBackward' class="btn btn-secondary mx-2 mt-2">Backward</button>
-        </div>
+    <div v-if="this.$store.state.isAuthenticated" id="gameView">
+        <div class="row mx-3 mb-3">
+            <div class="col text-center mt-3">
+                <h3 class="text-light">Map</h3>
+                <canvas id="grid" width="200" height="200"></canvas>
+                    <br>
+                <button @click='moveForward' class="btn btn-secondary mx-2 mb-2">Forward</button>
+                    <br>
+                <button @click='moveLeft' class="btn btn-secondary mx-2">Left</button>
+                <button @click='moveRight' class="btn btn-secondary mx-2">Right</button>
+                    <br>
+                <button @click='moveBackward' class="btn btn-secondary mx-2 mt-2">Backward</button>
+            </div>
 
-        <div class="col text-center mt-3">
-            <h3 class="text-light">Player Stats</h3>
-            build a model and render a list here.
+            <div class="col text-center mt-3">
+                <h3 class="text-light">Player Stats</h3>
+                build a model and render a list here.
+            </div>
         </div>
-    </div>
-    
-    <div class="row mx-3 overflow-auto" style="max-height:300px;">
-        <div class="col-md gameplay-container mb-3"> <!-- v-if="gameStorytiles[0]" -->
-            <div class="storytiles_content">
-                <div class="font-monospace bg-dark text-white mb-3">
-                    <ul v-for="item in promptList" :key="item.id" class="list-group text-white">
-                        <li v-if="item == promptList[0]" class="list-group-item active font-monospace bg-dark text-white">
-                            >>>{{ item }}
-                        </li>
-                        <li v-else class="list-group-item font-monospace bg-secondary text-white">
-                            >>>{{ item }}
-                        </li>
-                    </ul>
-                </div>                        
+        
+        <div class="row mx-3 overflow-auto" style="max-height:300px;">
+            <div class="col-md gameplay-container mb-3"> <!-- v-if="gameStorytiles[0]" -->
+                <div class="storytiles_content">
+                    <div class="font-monospace bg-dark text-white mb-3">
+                        <ul v-for="item in promptList.slice().reverse()" :key="item.id" class="list-group text-white">
+                            <li class="list-group-item font-monospace bg-secondary text-white">
+                                >>>{{ item }}
+                            </li>
+                        </ul>
+                    </div>                        
+                </div>
             </div>
         </div>
     </div>
-
+    <div v-else>
+        <p class="text-light">You must log in or sign up to play.</p>
+    </div>
 </template>
 
 <script>
+    import axios from 'axios'
+
     export default {        
         props: {
-            storytiles: {
-                type: Array,
-                required: true,
-                default: () => []
-            },
             story: {
                 type: String,
                 required: true,
                 default: () => ''
-            }
+            },
+            // storytiles: {
+            //     type: Array,
+            //     required: true,
+            //     default: () => []
+            // },
+            // promptList: {
+            //     type: Array,
+            //     required: true,
+            //     default: () => []
+            // },
         },
         data() {
             return {
-                gameStorytiles: this.storytiles,
+                storytiles: [],
                 gamePrompt: '',
                 gameXyCoord: '',
                 xCoord: 0,
                 yCoord: 0,
                 gameStory: '',
                 storyPrompt: '',
-                promptList: [],
+                promptList: [], // take this logic and put it in the app.vue, pass the prop down
+                maxStoryLength: 7,
             }
         },
-        methods: {            
+        computed: {
+            storyTilesTest () {
+                return this.storytiles.filter(tile => tile.story === this.story)
+            }
+        },
+        watch: {
+            story() {
+                this.resetStory()
+            } 
+                
+                // resetStory() {
+                // console.log('resetStory EXECUTED')
+                // this.xCoord = 0
+                // this.yCoord = 0
+                // this.promptList = []
+                // this.genGrid()
+                // this.setGamePrompts()
+        },
+        methods: {       
+            async getGameData() {
+                console.log('getGameData EXECUTED')
+                const response = await axios.get('api/story_tiles/')
+                this.storytiles = response.data
+                for (let i=0; i<this.storytiles.length; i++) {
+                    this.storytiles[i].xyCoords = `(${this.storytiles[i].x_coord}, ${this.storytiles[i].y_coord})`
+                }
+                this.setGameData()
+            },     
             setGameData() {
                 console.log('setGameData EXECUTED')
                 // this.gameStorytiles = this.storytiles
-                console.log(this.storytiles)
+                
                 this.xCoord = this.storytiles[0].x_coord
                 console.log('beginning this.xCoord: ', this.xCoord)
                 this.yCoord = this.storytiles[0].y_coord
@@ -84,18 +117,16 @@
             setCoords() {
                 console.log('setCoords EXECUTED')
                 this.xyCoord = `(${this.xCoord}, ${this.yCoord})`
-                console.log(this.xyCoord)
                 for (let i=0; i<this.storytiles.length; i++) {
                     if (this.storytiles[i].xyCoords == this.xyCoord && this.storytiles[i].story == this.story) {
                         this.storyPrompt = this.storytiles[i].prompt
-
                         // this.setGamePrompts()
                     }
                 }
             },
             setGamePrompts() {
                 this.promptList.push(`${this.gamePrompt} ${this.storyPrompt} ${this.xyCoord}`)
-                this.promptList.reverse()
+                // this.promptList.reverse()
                 console.log(`PROMPT LIST: ${this.promptList}`)
             },
             genGrid() {
@@ -106,28 +137,28 @@
                 ctx.strokeStyle = "#212529";
                 ctx.fillStyle = '#6610f2'
                 ctx.font = '10px serif'
-                ctx.lineWidth = 4;
+                ctx.lineWidth = 2;
 
                 // draw grid
-                for (let i = 0; i<= 2; i++) {
-                    const x = i*100;
+                for (let i = 0; i<= (this.maxStoryLength+1); i++) {
+                    const x = i*25;
                     ctx.moveTo(x, 0);
                     ctx.lineTo(x, canvas.height);
                     ctx.stroke();
 
-                    const y = i*100;
+                    const y = i*25;
                     ctx.moveTo(0, y);
                     ctx.lineTo(canvas.width, y);
                     ctx.stroke();
                 }
                 // fill grid
                 const p = ctx.lineWidth / 2; // padding
-                for (let xCell = 0; xCell < 2; xCell++) {
-                    for (let yCell = 0; yCell < 2; yCell++) {
+                for (let xCell = 0; xCell < (this.maxStoryLength+1); xCell++) {
+                    for (let yCell = 0; yCell < (this.maxStoryLength+1); yCell++) {
                         if (this.xCoord == xCell && this.yCoord == yCell) {
-                            const x = xCell * 100;
-                            const y = yCell * 100;
-                            ctx.fillRect(x+p, y+p, 100-p*2, 100-p*2);
+                            const x = xCell * 25;
+                            const y = yCell * 25;
+                            ctx.fillRect(x+p, y+p, 25-p*2, 25-p*2);
                         }
                     }
                 }
@@ -137,6 +168,8 @@
                 this.xCoord = 0
                 this.yCoord = 0
                 this.promptList = []
+                this.gamePrompt = ''
+                this.setCoords()
                 this.genGrid()
                 this.setGamePrompts()
             },
@@ -155,28 +188,28 @@
                 console.log('moveLeft EXECUTED', this.xCoord, this.yCoord)
             },
             moveRight () {
-                if (this.xCoord < 1) {
+                if (this.xCoord < (this.maxStoryLength)) {
                     this.xCoord ++
                     this.setCoords()
                     this.gamePrompt = ''
                     this.setGamePrompts()
                     this.genGrid()
                 }
-                else if (this.xCoord == 1) {
+                else if (this.xCoord == (this.maxStoryLength)) {
                     this.gamePrompt = "There is a massive cliff to your right. You cannot go in that direction."
                     this.setGamePrompts()
                 }
                 console.log('moveRight EXECUTED', this.xCoord, this.yCoord)
             },
             moveForward () {
-                if (this.yCoord < 1) {
+                if (this.yCoord < (this.maxStoryLength)) {
                     this.yCoord ++
                     this.setCoords()
                     this.gamePrompt = ''
                     this.setGamePrompts()
                     this.genGrid()
                 }
-                else if (this.yCoord == 1) {
+                else if (this.yCoord == (this.maxStoryLength)) {
                     this.gamePrompt = "There is a massive cliff ahead of you. You cannot go in that direction."
                     this.setGamePrompts()
                 }
@@ -202,7 +235,8 @@
             // this.setGameData()
         },
         beforeMount() {
-            this.setGameData()
+            this.getGameData()
+            
             // this.genGrid()
         }
     }
