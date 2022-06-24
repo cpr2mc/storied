@@ -15,7 +15,8 @@
 
             <div class="col text-center mt-3">
                 <h3 class="text-light">Player Stats</h3>
-                build a model and render a list here.
+                <p v-if="playerDead" class="text-danger">You died. Feel free to continue exploring though.</p>
+                <p v-else class="text-light">You are alive. Continue to explore.</p>
             </div>
         </div>
         
@@ -70,6 +71,8 @@
                 storyPrompt: '',
                 promptList: [], // take this logic and put it in the app.vue, pass the prop down
                 maxStoryLength: 7,
+                enemyTile: false,
+                playerDead: false,
             }
         },
         computed: {
@@ -80,15 +83,12 @@
         watch: {
             story() {
                 this.resetStory()
-            } 
+            },
+            enemyTile() {
+                this.playerDead = true
+            }
                 
-                // resetStory() {
-                // console.log('resetStory EXECUTED')
-                // this.xCoord = 0
-                // this.yCoord = 0
-                // this.promptList = []
-                // this.genGrid()
-                // this.setGamePrompts()
+
         },
         methods: {       
             async getGameData() {
@@ -102,7 +102,6 @@
             },     
             setGameData() {
                 console.log('setGameData EXECUTED')
-                // this.gameStorytiles = this.storytiles
                 
                 this.xCoord = this.storytiles[0].x_coord
                 console.log('beginning this.xCoord: ', this.xCoord)
@@ -120,13 +119,14 @@
                 for (let i=0; i<this.storytiles.length; i++) {
                     if (this.storytiles[i].xyCoords == this.xyCoord && this.storytiles[i].story == this.story) {
                         this.storyPrompt = this.storytiles[i].prompt
-                        // this.setGamePrompts()
+                        if (this.storytiles[i].enemy_tile === true) {
+                            this.enemyTile = true
+                        }
                     }
                 }
             },
             setGamePrompts() {
                 this.promptList.push(`${this.gamePrompt} ${this.storyPrompt} ${this.xyCoord}`)
-                // this.promptList.reverse()
                 console.log(`PROMPT LIST: ${this.promptList}`)
             },
             genGrid() {
